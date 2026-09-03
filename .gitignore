@@ -1,0 +1,35 @@
+# Maven build output
+target/
+
+# IntelliJ IDEA user-specific files
+.idea/
+.idea/workspace.xml
+.idea/**/workspace.xml
+.idea/shelf/
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Runtime logs
+*.log
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+application-local.properties
+
+# Operating system files
+.DS_Store
+Thumbs.db
