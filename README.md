@@ -5,7 +5,7 @@ A Spring Boot 4 REST API for retrieving the applicable price rate for a product 
 ## Requirements
 
 - Java 17
-- Maven 3.6.3 or newer
+- Maven Wrapper (recommended) or Maven 3.6.3 or newer
 
 ## Technology stack
 
@@ -16,19 +16,29 @@ A Spring Boot 4 REST API for retrieving the applicable price rate for a product 
 
 ## Running the service
 
-Start the application with Maven:
+Start the application with the Maven Wrapper:
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
+
+On Windows use `mvnw.cmd spring-boot:run`.
 
 The API is available at `http://localhost:8080`.
 
 To package and run the application as a JAR:
 
 ```bash
-mvn clean package
+./mvnw clean package
 java -jar target/product-pricing-api-0.0.1-SNAPSHOT.jar
+```
+
+To build and run the Docker image:
+
+```bash
+./mvnw clean package
+docker build -t product-pricing-api .
+docker run --rm -p 8080:8080 product-pricing-api
 ```
 
 ## API usage
@@ -62,11 +72,23 @@ Example response:
   "applicableRate": 2,
   "startDate": "2020-06-14T15:00:00",
   "endDate": "2020-06-14T18:30:00",
-  "price": 25.45
+  "price": 25.45,
+  "currency": "EUR"
 }
 ```
 
-The endpoint returns `404 Not Found` when no applicable price exists and `400 Bad Request` when a required parameter is missing or invalid.
+The endpoint returns `404 Not Found` with the standard error structure when no applicable price exists, and `400 Bad Request` when a required parameter is missing or invalid.
+
+Example `404` response:
+
+```json
+{
+  "timestamp": "2024-03-01T10:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "No applicable price rate found for the given request."
+}
+```
 
 ## Swagger / OpenAPI
 
@@ -87,10 +109,10 @@ http://localhost:8080/v3/api-docs
 Run the integration tests with:
 
 ```bash
-mvn test
+./mvnw test
 ```
 
-The tests cover the five reference pricing scenarios, missing and invalid parameters, requests without an applicable price, and unexpected service failures.
+JaCoCo generates the coverage report at `target/site/jacoco/index.html` when running `./mvnw verify`.
 
 ## H2 database
 
@@ -119,10 +141,12 @@ SELECT * FROM PRICES;
 
 ## Project structure
 
-The code is organized by responsibility following the Hexagonal Architecture:
+The code follows Hexagonal Architecture:
 
-- `domain`: core price model
-- `application`: price selection service
-- `infrastructure/adapter/in/web`: REST controller and response DTOs
-- `infrastructure/repository`: JPA entity and database repository
-- `infrastructure/config`: OpenAPI configuration
+- `domain`: core price model, independent of frameworks
+- `domain/model`: price model and domain exceptions
+- `domain/port`: domain ports implemented by adapters
+- `application/usecase`: use cases represented as framework-independent records
+- `adapter/web`: REST controllers, responses and exception handler
+- `adapter/persistence`: persistence adapter, JPA entity and Spring Data repository
+- `configuration`: Spring bean composition and OpenAPI configuration

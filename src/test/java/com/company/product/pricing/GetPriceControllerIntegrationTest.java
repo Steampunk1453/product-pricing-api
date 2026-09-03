@@ -1,13 +1,13 @@
 package com.company.product.pricing;
 
-import com.company.product.pricing.application.PriceService;
+import com.company.product.pricing.application.usecase.GetPrice;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ class GetPriceControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @MockitoSpyBean
-    private PriceService priceService;
+    private GetPrice getPrice;
 
     @Test
     @DisplayName("Case 1: Request at 10:00 on day 14th for product 35455 and brand 1 (ZARA)")
@@ -60,7 +60,8 @@ class GetPriceControllerIntegrationTest {
                 .andExpect(jsonPath("$.applicableRate").value(2))
                 .andExpect(jsonPath("$.startDate").value("2020-06-14T15:00:00"))
                 .andExpect(jsonPath("$.endDate").value("2020-06-14T18:30:00"))
-                .andExpect(jsonPath("$.price").value(25.45));
+                .andExpect(jsonPath("$.price").value(25.45))
+                .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
     @Test
@@ -148,15 +149,18 @@ class GetPriceControllerIntegrationTest {
                         .param("productId", "99999")
                         .param("brandId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("No applicable price rate found for the given request."));
     }
 
     @Test
     @DisplayName("Unexpected service failure returns INTERNAL SERVER ERROR 500")
     void shouldReturnInternalServerErrorWhenServiceFailsUnexpectedly() throws Exception {
         doThrow(new RuntimeException("Unexpected failure"))
-                .when(priceService)
-                .findPrice(any(LocalDateTime.class), eq(35455), eq(1));
+                .when(getPrice)
+                .execute(any(LocalDateTime.class), eq(35455), eq(1));
 
         try {
             mockMvc.perform(get("/api/prices")
@@ -169,7 +173,7 @@ class GetPriceControllerIntegrationTest {
                     .andExpect(jsonPath("$.error").value("Internal Server Error"))
                     .andExpect(jsonPath("$.message").value("An unexpected server error occurred."));
         } finally {
-            reset(priceService);
+            reset(getPrice);
         }
     }
 }

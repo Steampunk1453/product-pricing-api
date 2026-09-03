@@ -1,4 +1,4 @@
-package com.company.product.pricing.infrastructure.config;
+package com.company.product.pricing.configuration;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -16,5 +16,4 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("REST API for querying applicable product pricing and rates for a given brand and date"));
     }
-
 }

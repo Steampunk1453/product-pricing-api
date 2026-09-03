@@ -1,4 +1,4 @@
-package com.company.product.pricing.infrastructure.repository;
+package com.company.product.pricing.infrastructure.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface JpaPriceRepository extends JpaRepository<PriceEntity, Long> {
+public interface PriceJpaRepository extends JpaRepository<PriceEntity, Long> {
 
     @Query(value = """
         SELECT *
@@ -23,5 +23,4 @@ public interface JpaPriceRepository extends JpaRepository<PriceEntity, Long> {
         @Param("productId") Integer productId,
         @Param("brandId") Integer brandId
     );
-
 }

@@ -1,4 +1,4 @@
-package com.company.product.pricing.domain;
+package com.company.product.pricing.domain.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
